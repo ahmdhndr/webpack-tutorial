@@ -1,3 +1,4 @@
-# Webpack Tutorial
+# Basic Webpack
 
-A tutorial about webpack for beginner
+In this part, we installed webpack with no configuration at all, just add to package.json
+`json "script": { "start": "webpack" }`
