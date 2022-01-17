@@ -1,12 +1,29 @@
-# Webpack Config
+# Webpack: Add first loaders to handle CSS
 
-In this third part, we create webpack config in our root project `webpack.config.js` and add a basic
-configuration.
+In this part, we add `loaders` to handle CSS by installing
 
-Change the start script inside package.json to
-
-```json
-"script": {
-  "start": "webpack --config webpack.config.js",
-}
+```npm
+npm install --save-dev style-loader css-loader
 ```
+
+Add `loader` to webpack config under the `output object`:
+
+```js
+module: {
+  rules: [
+    {
+      test: /\.css$/i, // Webpack v5
+      use: ["style-loader", "css-loader"]
+    },
+  ],
+},
+```
+
+notes:
+
+- css-loader translate CSS to JavaScript
+- style-loader takes that translated CSS and injected to the DOM
+- In order to use it correctly, first we need to translate CSS before injecting it. So, you might
+  think `["css-loader", "style-loader"]` is the right order, but no.
+- Actually, they load in reverse order. So, we put `css-loader` which is executing first, at the end
+  of an array. Like this `["style-loader", "css-loader"]`
