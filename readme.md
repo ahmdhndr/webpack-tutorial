@@ -1,15 +1,12 @@
-# Basic Webpack
+# Webpack Config
 
-In this part, we installed webpack with no configuration at all, just add to package.json
+In this third part, we create webpack config in our root project `webpack.config.js` and add a basic
+configuration.
+
+Change the start script inside package.json to
 
 ```json
-"script": { "start": "webpack" }
+"script": {
+  "start": "webpack --config webpack.config.js",
+}
 ```
-
-When download the zip code or clone the repo, run :
-
-```bash
-npm start
-```
-
-It'll create `/dist/` folder with `main.js` inside
