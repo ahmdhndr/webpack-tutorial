@@ -62,7 +62,9 @@ module.exports = {
 ```
 
 Create our template in this case our html file inside `src` folder with the name that matches our
-name in config plugin file : **project**
+name in config plugin file :
+
+**project**
 
 ```
 webpack-tutorial
