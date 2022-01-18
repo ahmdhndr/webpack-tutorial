@@ -8,6 +8,16 @@ npm i --save-dev bootstrap
 
 Change `main.css` to `main.scss` in order to override `bootstrap` colors.
 
+Install required package to use sass-loader:
+
+```npm
+npm i --save-dev sass-loader sass webpack
+```
+
+> sass package above is going to install Dart Sass which is recommended by webpack
+
+> if you prefer Node Sass change sass to node-sass
+
 Inside `./main.scss` import bootstrap
 
 ```scss
