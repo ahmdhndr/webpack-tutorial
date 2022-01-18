@@ -1,19 +1,33 @@
-# Webpack: Add first loaders to handle CSS
+# Webpack: Add SASS loader, override Bootstrap colors
 
-In this part, we add `loaders` to handle CSS by installing
+In this part, we install `bootstrap` locally through npm package:
 
 ```npm
-npm install --save-dev style-loader css-loader
+npm i --save-dev bootstrap
 ```
 
-Add `loader` to webpack config under the `output object`:
+Change `main.css` to `main.scss` in order to override `bootstrap` colors.
+
+Inside `./main.scss` import bootstrap
+
+```scss
+$primary: teal; // change primary color
+$danger: violet; //change danger color
+@import "~bootstrap/scss/bootstrap";
+```
+
+Change the rules for the CSS to use SCSS
 
 ```js
 module: {
   rules: [
     {
-      test: /\.css$/i, // Webpack v5
-      use: ["style-loader", "css-loader"]
+      test: /\.scss$/,
+      use: [
+        "style-loader", // 3. Creates `style` nodes from JS strings
+        "css-loader", // 2. Translates CSS into CommonJS
+        "sass-loader" // 1. Compiles Sass to CSS
+      ]
     },
   ],
 },
@@ -21,9 +35,13 @@ module: {
 
 notes:
 
-- css-loader translate CSS to JavaScript
-- style-loader takes that translated CSS and injected to the DOM
-- In order to use it correctly, first we need to translate CSS before injecting it. So, you might
-  think `["css-loader", "style-loader"]` is the right order, but no.
-- Actually, they load in reverse order. So, we put `css-loader` which is executing first, at the end
-  of an array. Like this `["style-loader", "css-loader"]`
+- from the webpack documentation: https://webpack.js.org/loaders/sass-loader/
+
+  > sass-loader requires you to install either Dart Sass or Node Sass on your own.
+
+  > This allows you to control the versions of all your dependencies, and to choose which Sass
+  > implementation to use.
+
+  > ℹ️ We highly recommend using Dart Sass.
+
+  > ⚠ Node Sass does not work with Yarn PnP feature and doesn't support @use rule

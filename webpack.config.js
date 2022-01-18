@@ -1,17 +1,21 @@
-const path = require('path');
+const path = require("path");
 
 module.exports = {
-  mode: 'development',
-  entry: './src/index.js',
+  mode: "development",
+  entry: "./src/index.js",
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.js',
+    path: path.resolve(__dirname, "dist"),
+    filename: "bundle.js",
   },
   module: {
     rules: [
       {
-        test: /\.css$/i,
-        use: ['style-loader', 'css-loader'],
+        test: /\.scss$/,
+        use: [
+          "style-loader", // 3. Creates `style` nodes from JS strings
+          "css-loader", // 2. Translates CSS into CommonJS
+          "sass-loader", // 1. Compiles Sass to CSS
+        ],
       },
     ],
   },
