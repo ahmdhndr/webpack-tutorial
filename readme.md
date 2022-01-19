@@ -1,153 +1,86 @@
-# Webpack: Splitting Dev and Production
+# Webpack: HTML-Loader, Asset Modules, Clean `/dist` folder
 
-In this part, we're going to split our config to 3 different config files :
+- Added `html-loader` to automatically require the files we reference in img tags
 
-1. `webpack.common.js` // shared between dev and prod
-2. `webpack.dev.js` // for development
-3. `webpack.prod.js` // for production
+  ```npm
+  npm i --save-dev html-loader
+  ```
 
-So, when we are in `dev` mode we can add development server for live updating that we can just run
-instead of building the whole `dist` directory and having to manually open it, we can use
-`webpack-dev-server`. On the other end of things with `prod` we might want to minify our assets, or
-we might want to export our `CSS` into a separate file, we're gonna basically setup webpack to do
-that for us.
+  In `webpack.common.js`, add this line into `rules` :
 
-Create a new config file for `dev` and `prod` in the root project :
-
-```
-|- webpack.dev.js
-|- webpack.prod.js
-```
-
-It's all up to your preference whether to leave `webpack.config.js` as it is, or change the name to
-`webpack.common.js`
-
-```
-|- webpack.common.js
-```
-
-Now, our `webpack.common.js` should be something like this :
-
-```javascript
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-
-module.exports = {
-  entry: "./src/index.js",
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: "./src/template.html",
-    }),
-  ],
-  module: {
-    rules: [
-      {
-        test: /\.scss$/,
-        use: [
-          "style-loader", // 3. Creates `style` nodes from JS strings
-          "css-loader", // 2. Translates CSS into CommonJS
-          "sass-loader", // 1. Compiles Sass to CSS
-        ],
-      },
-    ],
+  ```javascript
+  ...
+  {
+    test: /\.html$/,
+    use: ["html-loader"],
   },
-};
-```
+  ```
 
-`webpack.dev.js` :
+- Webpack v5 use what so called `Asset Modules`.
 
-```javascript
-const path = require("path");
+  Webpack docs https://webpack.js.org/guides/asset-modules/
 
-module.exports = {
-  mode: "development",
-  devtool: "inline-source-map",
-  output: {
-    filename: "main.js",
-    path: path.resolve(__dirname, "dist"),
-  },
-};
-```
+  > Asset Modules is a type of module that allows one to use asset files (fonts, icons, etc) without
+  > configuring additional loaders.
+  >
+  > Prior to webpack 5 it was common to use:
+  >
+  > - `raw-loader` to import a file as a string
+  >
+  > - `url-loader` to inline a file into the bundle as a data URI
+  >
+  > - `file-loader` to emit a file into the output directory
+  >
+  > Asset Modules type replaces all of these loaders by adding 4 new module types:
+  >
+  > - `asset/resource` emits a separate file and exports the URL. Previously achievable by using
+  >   `file-loader`.
+  >
+  > - asset/inline exports a data URI of the asset. Previously achievable by using `url-loader`.
+  >
+  > - `asset/source` exports the source code of the asset. Previously achievable by using
+  >   raw-loader.
+  >
+  > - `asset` automatically chooses between exporting a data URI and emitting a separate file.
+  >   Previously achievable by using `url-loader` with asset size limit.
 
-`webpack.prod.js` :
+- Still inside `webpack.common.js`, add this line into `rules` :
 
-```javascript
-const path = require("path");
+  ```javascript
+  ...
+  {
+    test: /\.(svg|png|jpg|jpeg|gif)$/,
+    type: "asset/resource",
+  }
+  ```
 
-module.exports = {
-  mode: "production",
-  output: {
-    filename: "main.[contenthash].js",
-    path: path.resolve(__dirname, "dist"),
-  },
-};
-```
+- On `webpack.prod.js` when we actually build our code, we are going to separate asset (our image in
+  this case) into different folder inside `dist` folder, in our output object add this :
 
-Now, we are going to use package called `webpack-merge`, it's allows us to easily merge webpack
-config together, so, when on `dev` or `prod` we can include functionality from `webpack.common.js`
+  ```javascript
+  assetModuleFilename: "images/[name]-[hash][ext]";
+  ```
 
-```npm
-npm i --save-dev webpack-merge
-```
+  > images - will create a folder inside `dist` folder with the name of `images`, it's up to you
+  > want to create what name of the folder
+  >
+  > [name]-[hash][ext] - is going to create our image file with combining name of the file, hashed
+  > name generate by webpack, and add the extension based on the type of the image (svg, jpg, png,
+  > etc) in our `template.html` also by what we define in `webpack.common.js` earlier
+  >
+  > For more information, check this docs by webpack https://webpack.js.org/guides/asset-modules/
 
-In our `webpack.dev.js` :
+- Cleaning up the `/dist` folder
 
-```javascript
-const path = require("path");
-const common = require("./webpack.common");
-const { merge } = require("webpack-merge");
+  As you notice when we change something in our code, webpack will generate a new `hashed` file in
+  our `/dist` folder and has become quite cluttered. It's a good practice to clean the `/dist`
+  folder before each build, so that only used files will be generated. In webpack v5 it's quite easy
+  though, by adding `clean: true` inside our output object in `webpack.prod.js` because we only
+  needed when we actually build our code. ` webpack.prod.js` :
 
-module.exports = merge(common, {
-  mode: "development",
-  devtool: "inline-source-map",
-  output: {
-    filename: "main.js",
-    path: path.resolve(__dirname, "dist"),
-  },
-});
-```
-
-On `webpack.prod.js` :
-
-```javascript
-const path = require("path");
-const common = require("./webpack.common");
-const { merge } = require("webpack-merge");
-
-module.exports = merge(common, {
-  mode: "production",
-  output: {
-    filename: "main.[contenthash].js",
-    path: path.resolve(__dirname, "dist"),
-  },
-});
-```
-
-And change our `package.json` to be something like this :
-
-```json
-"scripts": {
-    "start": "webpack --config webpack.dev.js",
-    "build": "webpack --config webpack.prod.js"
-  },
-```
-
-Now we're going to setup our dev server using package called `webpack-dev-server` so when we are in
-development we don't have to building our dist, we don't run `npm start` everytime when we want to
-see something changes.
-
-To use `webpack-dev-server` :
-
-```npm
-npm i --save-dev webpack-dev-server
-```
-
-Now in our package.json :
-
-```json
-"start": "webpack-dev-server --config webpack.dev.js --open",
-```
-
-> --open [optional] basically will open up a window in the browser for us
-
-And then when we run `npm start` it'll use `webpack-dev-server` and open a window in our browser, so
-everytime we make a changes in our code it'll automatically change in the browser.
+  ```javascript
+  {
+    ...
+    clean: true,
+  }
+  ```
